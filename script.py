@@ -1,6 +1,7 @@
 import os
 from anthropic import AsyncAnthropic
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram import ReplyKeyboardMarkup
 
 claude = AsyncAnthropic()
 OWNER = int(os.environ["OWNER_ID"])
@@ -11,6 +12,11 @@ MODELS = {
 }
 history = {}
 total = {"in": 0, "out": 0}
+
+KB = ReplyKeyboardMarkup(
+    [["/model haiku", "/model sonnet", "/model opus"],["/stats", "/clear"]],
+    resize_keyboard=True,
+)
 
 async def reply(update, context):
     if update.effective_user.id != OWNER:
@@ -46,7 +52,13 @@ async def clear(update, context):
     history.pop(update.effective_chat.id, None)
     await update.message.reply_text("Диалог очищен")
 
+async def start(update, context):
+    if update.effective_user.id != OWNER:
+        return
+    await update.message.reply_text("Выберите действие", reply_markup=KB)
+
 app = ApplicationBuilder().token(os.environ["TELEGRAM_TOKEN"]).build()
+app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("model", set_model))
 app.add_handler(CommandHandler("stats", stats))
 app.add_handler(CommandHandler("clear", clear))
