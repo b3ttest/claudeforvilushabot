@@ -59,7 +59,7 @@ async def clear(update, context):
 async def start(update, context):
     if update.effective_user.id != OWNER:
         return
-    await update.message.reply_text("Выберите действие", reply_markup=KB)
+    await update.message.reply_text("Привет, чем могу помочь?", reply_markup=KB)
 
 async def button(update, context):
     if update.effective_user.id != OWNER:
