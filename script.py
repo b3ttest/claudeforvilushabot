@@ -13,8 +13,12 @@ MODELS = {
 history = {}
 total = {"in": 0, "out": 0}
 
+BTN_MODELS = {"⚡ Быстрая": "haiku", "⚖️ Средняя": "sonnet", "🧠 Мощная": "opus"}
+BTN_STATS = "📊 Статистика"
+BTN_CLEAR = "🧹 Очистить"
+
 KB = ReplyKeyboardMarkup(
-    [["/model haiku", "/model sonnet", "/model opus"],["/stats", "/clear"]],
+    [list(BTN_MODELS), [BTN_STATS, BTN_CLEAR]],
     resize_keyboard=True,
 )
 
@@ -57,10 +61,23 @@ async def start(update, context):
         return
     await update.message.reply_text("Выберите действие", reply_markup=KB)
 
+async def button(update, context):
+    if update.effective_user.id != OWNER:
+        return
+    t = update.message.text
+    if t in BTN_MODELS:
+        context.bot_data["model"] = MODELS[BTN_MODELS[t]]
+        await update.message.reply_text(f"Сейчас: {context.bot_data['model']}")
+    elif t == BTN_STATS:
+        await stats(update, context)
+    elif t == BTN_CLEAR:
+        await clear(update, context)
+
 app = ApplicationBuilder().token(os.environ["TELEGRAM_TOKEN"]).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("model", set_model))
 app.add_handler(CommandHandler("stats", stats))
 app.add_handler(CommandHandler("clear", clear))
+app.add_handler(MessageHandler(filters.Text(list(BTN_MODELS) + [BTN_STATS, BTN_CLEAR]), button))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, reply))
 app.run_polling()
