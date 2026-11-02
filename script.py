@@ -2,7 +2,7 @@ import os
 from anthropic import AsyncAnthropic
 from telegram.ext import ApplicationBuilder, MessageHandler, filters
 
-claude = AsyncAnthropic()  # ключ берёт из ANTHROPIC_API_KEY
+claude = AsyncAnthropic()
 OWNER = int(os.environ["OWNER_ID"])
 history = {}
 
